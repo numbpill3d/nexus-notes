@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import styled, { keyframes } from 'styled-components';
+import React, { useState, useCallback } from 'react';
+import styled from 'styled-components';
 
-// ASCII-style tree connector characters
-const TreeConnectors = {
-  vertical: '│',
-  horizontal: '──',
-  branch: '├',
-  lastBranch: '└',
-  expanded: '[-]',
-  collapsed: '[+]'
+// Windows 98 tree icons (using Unicode characters)
+const TreeIcons = {
+  expanded: '▼',
+  collapsed: '►',
+  folder: '📁',
+  folderOpen: '📂',
+  verticalLine: '│',
+  horizontalLine: '─',
+  branchLine: '├',
+  lastBranchLine: '└'
 };
 
 interface NoteNode {
   id: string;
   title: string;
+  favicon?: string | null;
   children?: NoteNode[];
 }
 
@@ -21,55 +24,130 @@ interface TreeNodeProps {
   node: NoteNode;
   level: number;
   isLast: boolean;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+  onContextMenu: (e: React.MouseEvent, id: string) => void;
 }
 
-const glitchAnimation = keyframes`
-  0% { text-shadow: none; }
-  20% { text-shadow: 0 0 2px #00ff00; }
-  40% { text-shadow: -1px 0 #00ff00; }
-  60% { text-shadow: 1px 0 #00ff00; }
-  80% { text-shadow: none; }
-`;
+interface NoteTreeProps {
+  notes: NoteNode[];
+  onSelect?: (id: string) => void;
+  onContextMenu?: (e: React.MouseEvent, id: string) => void;
+}
 
 const TreeContainer = styled.div`
-  font-family: 'Courier New', monospace;
-  color: #00ff00;
-  background-color: #000;
-  padding: 1rem;
+  font-family: "Microsoft Sans Serif", sans-serif;
+  color: #000;
+  background-color: #fff;
+  padding: 4px;
   user-select: none;
+  font-size: 12px;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  height: 100%;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    width: 16px;
+    background-color: #c0c0c0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+  }
 `;
 
 const NodeContainer = styled.div`
   display: flex;
   align-items: flex-start;
-  margin: 0.2rem 0;
-  &:hover {
-    animation: ${glitchAnimation} 0.2s linear;
-  }
+  margin: 1px 0;
 `;
 
-const NodeContent = styled.div<{ level: number }>`
+const NodeContent = styled.div<{ level: number; isSelected: boolean }>`
   display: flex;
   align-items: center;
+  padding: 1px 2px;
   padding-left: ${props => props.level * 16}px;
   cursor: pointer;
+  background-color: ${props => props.isSelected ? '#000080' : 'transparent'};
+  color: ${props => props.isSelected ? '#fff' : '#000'};
+
+  &:hover {
+    background-color: ${props => props.isSelected ? '#000080' : '#e0e0e0'};
+  }
 `;
 
 const ToggleButton = styled.span`
-  margin-right: 8px;
-  color: #00ff00;
-  font-weight: bold;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: inherit;
 `;
 
-const NodeTitle = styled.span`
-  &:hover {
-    color: #fff;
-    text-shadow: 0 0 5px #00ff00;
-  }
+const FolderIcon = styled.span`
+  margin-right: 4px;
+  font-size: 14px;
 `;
 
-const TreeNode: React.FC<TreeNodeProps> = ({ node, level, isLast }) => {
+const TreeLines = styled.span`
+  color: #808080;
+  margin-right: 4px;
+  font-family: monospace;
+`;
+
+const NodeTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const Favicon = styled.span`
+  font-size: 14px;
+  min-width: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Title = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const TreeNode: React.FC<TreeNodeProps> = ({
+  node,
+  level,
+  isLast,
+  isSelected,
+  onSelect,
+  onContextMenu
+}) => {
   const [isExpanded, setIsExpanded] = useState(true);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(node.id);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onContextMenu(e, node.id);
+  };
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,19 +159,32 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, isLast }) => {
   return (
     <>
       <NodeContainer>
-        <NodeContent level={level}>
+        <NodeContent
+          level={level}
+          isSelected={isSelected}
+          onClick={handleClick}
+          onContextMenu={handleContextMenu}
+        >
+          {level > 0 && (
+            <TreeLines>
+              {isLast ? TreeIcons.lastBranchLine : TreeIcons.branchLine}
+              {TreeIcons.horizontalLine}
+            </TreeLines>
+          )}
           {hasChildren && (
             <ToggleButton onClick={handleToggle}>
-              {isExpanded ? TreeConnectors.expanded : TreeConnectors.collapsed}
+              {isExpanded ? TreeIcons.expanded : TreeIcons.collapsed}
             </ToggleButton>
           )}
-          {level > 0 && (
-            <>
-              {isLast ? TreeConnectors.lastBranch : TreeConnectors.branch}
-              {TreeConnectors.horizontal}
-            </>
-          )}
-          <NodeTitle>{node.title}</NodeTitle>
+          <FolderIcon>
+            {hasChildren ? (isExpanded ? TreeIcons.folderOpen : TreeIcons.folder) : TreeIcons.folder}
+          </FolderIcon>
+          <NodeTitle>
+            {!hasChildren && node.favicon && (
+              <Favicon>{node.favicon}</Favicon>
+            )}
+            <Title>{node.title}</Title>
+          </NodeTitle>
         </NodeContent>
       </NodeContainer>
       
@@ -105,6 +196,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, isLast }) => {
               node={child}
               level={level + 1}
               isLast={index === node.children!.length - 1}
+              isSelected={isSelected}
+              onSelect={onSelect}
+              onContextMenu={onContextMenu}
             />
           ))}
         </div>
@@ -113,11 +207,19 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, level, isLast }) => {
   );
 };
 
-interface NoteTreeProps {
-  notes: NoteNode[];
-}
+const NoteTree: React.FC<NoteTreeProps> = ({ notes, onSelect, onContextMenu }) => {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-const NoteTree: React.FC<NoteTreeProps> = ({ notes }) => {
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    onSelect?.(id);
+  }, [onSelect]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, id: string) => {
+    setSelectedId(id);
+    onContextMenu?.(e, id);
+  }, [onContextMenu]);
+
   return (
     <TreeContainer>
       {notes.map((note, index) => (
@@ -126,6 +228,9 @@ const NoteTree: React.FC<NoteTreeProps> = ({ notes }) => {
           node={note}
           level={0}
           isLast={index === notes.length - 1}
+          isSelected={selectedId === note.id}
+          onSelect={handleSelect}
+          onContextMenu={handleContextMenu}
         />
       ))}
     </TreeContainer>

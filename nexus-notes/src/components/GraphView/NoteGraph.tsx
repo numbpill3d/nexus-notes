@@ -114,4 +114,4 @@ const NoteGraph: React.FC<NoteGraphProps> = ({ data }) => {
   );
 };
 
-export default NoteGraph;
+export default NoteGraph; 

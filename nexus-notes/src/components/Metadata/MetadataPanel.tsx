@@ -1,62 +1,51 @@
 import React, { useState } from 'react';
-import styled, { keyframes } from 'styled-components';
-
-const glitchText = keyframes`
-  0% { text-shadow: none; }
-  20% { text-shadow: 0 0 2px #00ff00; }
-  21% { text-shadow: -1px 0 #00ff00; }
-  25% { text-shadow: 1px 0 #00ff00; }
-  30% { text-shadow: none; }
-`;
+import styled from 'styled-components';
 
 const MetadataContainer = styled.div`
   height: 100%;
-  background-color: #000;
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
-  padding: 1rem;
+  background-color: #c0c0c0;
+  color: #000;
+  font-family: "Microsoft Sans Serif", sans-serif;
+  padding: 8px;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
-    width: 8px;
-    background-color: #111;
+    width: 16px;
+    background-color: #c0c0c0;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #00ff00;
-    border-radius: 4px;
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #c0c0c0;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
   }
 `;
 
-const Section = styled.div`
-  margin-bottom: 2rem;
-  border: 1px solid #00ff00;
-  padding: 1rem;
-  background-color: #0a0a0a;
+const Section = styled.fieldset`
+  margin-bottom: 12px;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  padding: 8px;
+  background-color: #c0c0c0;
 `;
 
-const SectionTitle = styled.h3`
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #00ff00;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-
-  &:hover {
-    animation: ${glitchText} 0.3s linear;
-  }
-
-  &::before {
-    content: '[>]';
-    margin-right: 0.5rem;
-    color: #00ff00;
-  }
+const SectionTitle = styled.legend`
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: bold;
 `;
 
 const MetadataField = styled.div`
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
 
   &:last-child {
     margin-bottom: 0;
@@ -64,8 +53,9 @@ const MetadataField = styled.div`
 `;
 
 const Label = styled.span`
-  color: #008800;
-  margin-right: 0.5rem;
+  color: #000;
+  margin-right: 8px;
+  min-width: 80px;
 
   &::after {
     content: ':';
@@ -73,61 +63,99 @@ const Label = styled.span`
 `;
 
 const Value = styled.span`
-  color: #00ff00;
+  color: #000;
 `;
 
 const TagContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 4px;
 `;
 
-const Tag = styled.span`
-  background-color: #111;
-  border: 1px solid #00ff00;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.8rem;
+const Tag = styled.button`
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: "Microsoft Sans Serif", sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 4px;
 
-  &:hover {
-    background-color: #002200;
-    animation: ${glitchText} 0.2s linear;
+  &:active {
+    border-color: #808080 #ffffff #ffffff #808080;
   }
 `;
 
 const AddTagButton = styled.button`
-  background: none;
-  border: 1px dashed #00ff00;
-  color: #00ff00;
-  padding: 0.2rem 0.5rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 2px 6px;
+  font-family: "Microsoft Sans Serif", sans-serif;
+  font-size: 11px;
   cursor: pointer;
 
-  &:hover {
-    background-color: #002200;
-    animation: ${glitchText} 0.2s linear;
+  &:active {
+    border-color: #808080 #ffffff #ffffff #808080;
   }
 `;
 
 const TagInput = styled.input`
-  background: #111;
-  border: 1px solid #00ff00;
-  color: #00ff00;
-  padding: 0.2rem 0.5rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
-  width: 100%;
-  margin-bottom: 0.5rem;
+  background: #fff;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  color: #000;
+  padding: 2px 4px;
+  font-family: "Microsoft Sans Serif", sans-serif;
+  font-size: 11px;
+  width: calc(100% - 16px);
+  margin: 4px 0;
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 5px #00ff00;
   }
 `;
+
+const ImageInput = styled.input`
+  background: #fff;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  color: #000;
+  padding: 2px 4px;
+  font-family: "Microsoft Sans Serif", sans-serif;
+  font-size: 11px;
+  width: calc(100% - 16px);
+  margin: 4px 0;
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const EmojiPicker = styled.div`
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+`;
+
+const EmojiButton = styled.button`
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 2px;
+  font-size: 16px;
+  cursor: pointer;
+
+  &:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+  }
+`;
+
+const commonEmojis = ['📝', '📚', '💡', '⭐', '📌', '📎', '🔖', '📋', '📁', '🗂️', '📊', '📈', '🎯', '⚡', '🔍', '🎨'];
 
 interface MetadataPanelProps {
   metadata: {
@@ -136,13 +164,19 @@ interface MetadataPanelProps {
     wordCount: number;
     characterCount: number;
     tags: string[];
+    favicon?: string;
+    coverImage?: string;
   };
   onTagsChange?: (tags: string[]) => void;
+  onFaviconChange?: (favicon: string) => void;
+  onCoverImageChange?: (coverImage: string) => void;
 }
 
 export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   metadata,
   onTagsChange,
+  onFaviconChange,
+  onCoverImageChange,
 }) => {
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTag, setNewTag] = useState('');
@@ -217,6 +251,66 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
             </AddTagButton>
           )}
         </TagContainer>
+      </Section>
+
+      <Section>
+        <SectionTitle>Appearance</SectionTitle>
+        <MetadataField>
+          <Label>Favicon</Label>
+          <Value>{metadata.favicon || 'None'}</Value>
+        </MetadataField>
+        <EmojiPicker>
+          {commonEmojis.map(emoji => (
+            <EmojiButton
+              key={emoji}
+              onClick={() => onFaviconChange?.(emoji)}
+              style={{
+                background: metadata.favicon === emoji ? '#ffffff' : '#c0c0c0',
+              }}
+            >
+              {emoji}
+            </EmojiButton>
+          ))}
+        </EmojiPicker>
+        <MetadataField style={{ marginTop: '8px' }}>
+          <Label>Cover Image</Label>
+          {metadata.coverImage ? (
+            <div style={{ width: '100%' }}>
+              <img
+                src={metadata.coverImage}
+                alt="Note cover"
+                style={{
+                  width: '100%',
+                  height: '100px',
+                  objectFit: 'cover',
+                  marginBottom: '4px',
+                  border: '2px solid',
+                  borderColor: '#808080 #ffffff #ffffff #808080',
+                }}
+              />
+              <button
+                onClick={() => onCoverImageChange?.('')}
+                style={{
+                  fontSize: '11px',
+                  padding: '2px 6px',
+                  marginTop: '4px',
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <ImageInput
+              type="text"
+              placeholder="Enter image URL..."
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  onCoverImageChange?.((e.target as HTMLInputElement).value);
+                }
+              }}
+            />
+          )}
+        </MetadataField>
       </Section>
     </MetadataContainer>
   );
